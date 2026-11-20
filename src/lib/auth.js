@@ -13,7 +13,9 @@ export const authOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
-    CredentialsProvider({
+    // The demo login accepts ANY email with no password, so anyone could sign
+    // in as anyone. It is only switched on when ENABLE_DEMO_LOGIN=true.
+    ...(process.env.ENABLE_DEMO_LOGIN === "true" ? [CredentialsProvider({
       name: "Demo / Admin Account",
       credentials: {
         email: { label: "Email", type: "email", placeholder: "demo@creator.local" },
@@ -52,9 +54,33 @@ export const authOptions = {
           };
         }
       },
-    }),
+    })] : []),
   ],
   callbacks: {
+    // Every account shares the same MuAPI key (and so the same connected
+    // social channels), so sign-in is restricted:
+    //  - ALLOWED_EMAILS (comma-separated) if set, otherwise
+    //  - only the first account ever created, plus accounts that already exist.
+    async signIn({ user }) {
+      const email = (user?.email || "").trim().toLowerCase();
+      if (!email) return false;
+
+      const allowList = (process.env.ALLOWED_EMAILS || "")
+        .split(",")
+        .map(e => e.trim().toLowerCase())
+        .filter(Boolean);
+      if (allowList.length > 0) return allowList.includes(email);
+
+      try {
+        const existing = await prisma.user.findUnique({ where: { email } });
+        if (existing) return true;
+        const count = await prisma.user.count();
+        return count === 0;
+      } catch (err) {
+        console.error("[AUTH_SIGNIN_CHECK]", err);
+        return false;
+      }
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
