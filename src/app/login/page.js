@@ -26,7 +26,7 @@ function LoginContent() {
           </div>
           <h2 className="text-2xl font-black uppercase tracking-tight">Sign In to Studio</h2>
           <p className="text-xs font-semibold text-secondary-text leading-relaxed px-4">
-            Sign in with Google to enable predictions, save generation history, and top up credits packages.
+            Sign in with Google to schedule and publish posts across your connected channels.
           </p>
         </div>
 
@@ -43,7 +43,7 @@ function LoginContent() {
         <div className="flex items-start gap-2.5 bg-primary/5 border border-primary/10 p-3.5 rounded text-[11px] leading-relaxed text-secondary-text">
           <FaInfoCircle className="text-primary text-xs shrink-0 mt-0.5" />
           <span>
-            By signing in, you agree to our Terms of Service. Purchases are stripe-secured and credit balance addition is automated.
+            Private workspace. Only approved accounts can sign in.
           </span>
         </div>
       </div>

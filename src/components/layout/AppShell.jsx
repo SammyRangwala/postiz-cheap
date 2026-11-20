@@ -29,6 +29,9 @@ import {
 } from "react-icons/fi";
 import ThemeToggle from "@/components/ThemeToggle";
 
+// Credits/pricing UI is for resellers; hidden on a private install.
+const SHOW_BILLING = process.env.NEXT_PUBLIC_ENABLE_CREDITS === "true";
+
 // Custom Brand Logo
 export const StudioBrandLogo = ({ className = "w-10 h-10" }) => (
   <div
@@ -106,11 +109,11 @@ export default function AppShell({ children }) {
       path: "/media",
       icon: <FiImage className="w-5 h-5" />,
     },
-    {
+    ...(SHOW_BILLING ? [{
       name: "Pricing",
       path: "/pricing",
       icon: <FiCreditCard className="w-5 h-5" />,
-    },
+    }] : []),
   ];
 
   const getPageTitle = () => {
@@ -300,6 +303,7 @@ export default function AppShell({ children }) {
               {/* Theme Mode Toggle Button */}
               <ThemeToggle />
 
+              {SHOW_BILLING && (<>
               {/* Credits Chip */}
               <Link
                 href="/pricing"
@@ -310,6 +314,7 @@ export default function AppShell({ children }) {
                 <span className="font-mono">{credits}</span>
                 <span className="text-[10px] text-amber-500 dark:text-amber-400 font-bold bg-amber-500/10 px-1.5 py-0.2 rounded">+</span>
               </Link>
+              </>)}
 
               {/* Write with AI Button */}
               <button
@@ -379,6 +384,7 @@ export default function AppShell({ children }) {
               </div>
             </div>
 
+            {SHOW_BILLING && (<>
             {/* Credits Card */}
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-[#212020] border border-zinc-200 dark:border-[#2d2c2c] transition-colors">
               <div className="flex items-center gap-2">
@@ -398,6 +404,7 @@ export default function AppShell({ children }) {
                 Top Up
               </Link>
             </div>
+            </>)}
 
             {/* Theme Toggle Row in Modal */}
             <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-[#212020] border border-zinc-200 dark:border-[#2d2c2c] transition-colors">
@@ -423,6 +430,7 @@ export default function AppShell({ children }) {
                 <FiImage className="text-pink-500 dark:text-pink-400" />
                 <span>Media Asset Library</span>
               </Link>
+              {SHOW_BILLING && (
               <Link
                 href="/pricing"
                 onClick={() => setProfileDropdownOpen(false)}
@@ -431,6 +439,7 @@ export default function AppShell({ children }) {
                 <FiCreditCard className="text-amber-500 dark:text-amber-400" />
                 <span>Pricing Plans</span>
               </Link>
+              )}
             </div>
 
             {/* Sign Out Button */}

@@ -22,6 +22,8 @@ import Link from "next/link";
 import ContentCalendar from "@/components/calendar/ContentCalendar";
 import PostComposerModal from "@/components/composer/PostComposerModal";
 
+const SHOW_BILLING = process.env.NEXT_PUBLIC_ENABLE_CREDITS === "true";
+
 export default function WorkspaceDashboard() {
   const { data: session, status } = useSession();
   const [posts, setPosts] = useState([]);
@@ -356,6 +358,7 @@ export default function WorkspaceDashboard() {
           </Link>
         </div>
 
+        {SHOW_BILLING && (<>
         {/* Card 4: Credits Balance */}
         <div className="p-3.5 rounded-[12px] bg-white dark:bg-[#1a1919] border border-zinc-200 dark:border-[#252525] flex items-center justify-between shadow-xs dark:shadow-sm transition-colors">
           <div className="space-y-0.5">
@@ -373,6 +376,7 @@ export default function WorkspaceDashboard() {
             Top Up
           </Link>
         </div>
+        </>)}
       </div>
 
       {/* Content Calendar Main Component */}
