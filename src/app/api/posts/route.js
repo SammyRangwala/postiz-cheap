@@ -88,8 +88,24 @@ export async function POST(req) {
       ? body.platforms
       : (body.platform ? [body.platform] : []);
 
-    if (!mediaUrl || targetPlatforms.length === 0) {
-      return NextResponse.json({ error: "Missing required fields: at least one platform and mediaUrl are mandatory." }, { status: 400 });
+    if (targetPlatforms.length === 0) {
+      return NextResponse.json({ error: "Select at least one channel to post to." }, { status: 400 });
+    }
+
+    // Every platform needs an image or video: either its own override or the
+    // shared "All Channels" media.
+    const overridesForCheck = body.platformOverrides || {};
+    const isUsableMedia = (u) => typeof u === "string" && /^https:\/\//i.test(u.trim());
+    const missingMedia = targetPlatforms.filter((plat) => {
+      const norm = plat.toLowerCase().replace("x_twitter", "x").replace("twitter", "x");
+      const ov = overridesForCheck[plat] || overridesForCheck[norm] || {};
+      const url = (ov.mediaUrl && ov.mediaUrl.trim()) ? ov.mediaUrl : mediaUrl;
+      return !isUsableMedia(url);
+    });
+    if (missingMedia.length > 0) {
+      return NextResponse.json({
+        error: `Every post needs an uploaded image or video. Missing or invalid media for: ${missingMedia.join(", ")}. Upload a file on the "All Channels" tab to use it everywhere.`
+      }, { status: 400 });
     }
 
     let user = null;

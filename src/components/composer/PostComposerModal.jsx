@@ -570,13 +570,11 @@ export default function PostComposerModal({
         body: formData,
       });
 
-      let finalUrl = "";
-      if (!res.ok) {
-        finalUrl = URL.createObjectURL(file);
-      } else {
-        const data = await res.json();
-        finalUrl = data.url || URL.createObjectURL(file);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url || !/^https:\/\//i.test(data.url)) {
+        throw new Error(data.error || "Upload failed. Please try again.");
       }
+      const finalUrl = data.url;
 
       if (activeComposerTab === "all") {
         setMediaUrl(finalUrl);
@@ -590,19 +588,10 @@ export default function PostComposerModal({
         }));
       }
     } catch (err) {
-      console.warn("Upload fallback used:", err);
-      const fallbackUrl = URL.createObjectURL(file);
-      if (activeComposerTab === "all") {
-        setMediaUrl(fallbackUrl);
-      } else {
-        setPlatformOverrides((prev) => ({
-          ...prev,
-          [activeComposerTab]: {
-            ...prev[activeComposerTab],
-            mediaUrl: fallbackUrl,
-          },
-        }));
-      }
+      // A local preview URL would look fine here but can't be published, so
+      // surface the failure instead of hiding it.
+      console.error("Media upload failed:", err);
+      setErrorMsg(err.message || "Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -630,9 +619,18 @@ export default function PostComposerModal({
   };
 
   const handleSubmit = async (statusOverride = null, forceImmediate = false) => {
-    const hasAnyMedia = mediaUrl || Object.values(platformOverrides).some((o) => !!o.mediaUrl);
-    if (!hasAnyMedia) {
-      setErrorMsg("Please upload or provide a media URL for your post.");
+    const isUsableMedia = (u) => typeof u === "string" && /^https:\/\//i.test(u.trim());
+    const missingMedia = selectedPlatforms.filter((plat) => {
+      const ov = platformOverrides[plat] || {};
+      const url = ov.mediaUrl && ov.mediaUrl.trim() ? ov.mediaUrl : mediaUrl;
+      return !isUsableMedia(url);
+    });
+    if (selectedPlatforms.length === 0) {
+      setErrorMsg("Select at least one channel to post to.");
+      return;
+    }
+    if (missingMedia.length > 0) {
+      setErrorMsg(`Every post needs an uploaded image or video. Missing or invalid media for: ${missingMedia.join(", ")}. Upload a file on the "All Channels" tab to use it everywhere.`);
       return;
     }
 
