@@ -37,6 +37,12 @@ const config = {
   ai: {
     apiKey: process.env.MUAPIAPP_API_KEY,
     generationCost: 1, // Deducted per social post trigger
+  },
+  credits: {
+    // The in-app credit system is for people reselling this app. On a private
+    // self-hosted install it would silently stop publishing after 10 posts,
+    // so it stays off unless ENABLE_CREDITS=true.
+    enabled: process.env.ENABLE_CREDITS === "true",
   }
 };
 

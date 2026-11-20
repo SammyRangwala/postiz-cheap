@@ -39,7 +39,7 @@ export const BillingService = {
       const credits = parseInt(session.metadata.credits || "0", 10);
 
       if (userId && credits > 0) {
-        await UserService.addCredits(userId, credits);
+        await UserService.addCredits(userId, credits, { force: true });
         return { success: true, userId, credits };
       }
     }
