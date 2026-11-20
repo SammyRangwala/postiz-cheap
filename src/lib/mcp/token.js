@@ -22,6 +22,6 @@ export async function hasToken(userId) {
 
 export async function userIdForToken(token) {
   if (!token || typeof token !== "string" || !token.startsWith("sms_") || token.length < 20) return null;
-  const u = await prisma.user.findUnique({ where: { mcpTokenHash: hash(token) }, select: { id: true } });
+  const u = await prisma.user.findFirst({ where: { mcpTokenHash: hash(token) }, select: { id: true } });
   return u?.id || null;
 }
