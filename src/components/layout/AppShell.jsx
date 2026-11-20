@@ -25,7 +25,8 @@ import {
   FiLogOut, 
   FiMenu, 
   FiDollarSign,
-  FiBarChart2
+  FiBarChart2,
+  FiLink
 } from "react-icons/fi";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -109,6 +110,11 @@ export default function AppShell({ children }) {
       path: "/media",
       icon: <FiImage className="w-5 h-5" />,
     },
+    {
+      name: "Claude",
+      path: "/connector",
+      icon: <FiLink className="w-5 h-5" />,
+    },
     ...(SHOW_BILLING ? [{
       name: "Pricing",
       path: "/pricing",
@@ -123,6 +129,7 @@ export default function AppShell({ children }) {
     if (pathname.startsWith("/integrations")) return "Channels & Integrations";
     if (pathname.startsWith("/media") || pathname.startsWith("/gallery")) return "Media Asset Library";
     if (pathname.startsWith("/pricing")) return "Pricing & Credits";
+    if (pathname.startsWith("/connector")) return "Claude Connector";
     if (pathname.startsWith("/login")) return "Sign In";
     return "Creator Studio";
   };

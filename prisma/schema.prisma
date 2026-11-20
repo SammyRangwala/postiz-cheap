@@ -41,6 +41,7 @@ model User {
   image          String?
   credits        Int             @default(10)
   customApiKey   String?
+  mcpTokenHash   String?         @unique
   accounts       Account[]
   sessions       Session[]
   scheduledPosts ScheduledPost[]
