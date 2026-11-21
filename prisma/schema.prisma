@@ -83,6 +83,8 @@ model ScheduledPost {
   status         String    @default("scheduled")
   requestId      String?   @unique
   publishedUrl   String?   @db.Text
+  publishResult  String?   @db.Text
+  publishedAt    DateTime?
   error          String?   @db.Text
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
