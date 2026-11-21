@@ -40,7 +40,18 @@ export async function triggerMuApiPublish(platform, payload) {
     bodyData.made_for_kids = payload.madeForKids || false;
   } else if (plat === "tiktok") {
     bodyData.title = payload.title || captionText;
-    bodyData.privacy_level = payload.privacy || "PUBLIC_TO_EVERYONE";
+    // TikTok only accepts its own privacy values; map the app's generic ones.
+    const tiktokPrivacy = {
+      public: "PUBLIC_TO_EVERYONE",
+      unlisted: "FOLLOWER_OF_CREATOR",
+      private: "SELF_ONLY",
+      friends: "MUTUAL_FOLLOW_FRIENDS",
+    };
+    const allowed = ["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "FOLLOWER_OF_CREATOR", "SELF_ONLY"];
+    const rawPrivacy = payload.privacy || "PUBLIC_TO_EVERYONE";
+    bodyData.privacy_level = allowed.includes(rawPrivacy)
+      ? rawPrivacy
+      : (tiktokPrivacy[String(rawPrivacy).toLowerCase()] || "PUBLIC_TO_EVERYONE");
     bodyData.disable_comment = payload.disableComment || false;
     bodyData.disable_duet = payload.disableDuet || false;
     bodyData.disable_stitch = payload.disableStitch || false;
