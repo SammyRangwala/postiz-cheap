@@ -6,6 +6,9 @@ on:
   schedule:
     - cron: "*/10 * * * *"
   workflow_dispatch:
+  # Also run on every push to main, so a push can kick the publisher immediately.
+  push:
+    branches: [main]
 
 permissions:
   actions: write

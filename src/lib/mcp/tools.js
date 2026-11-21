@@ -201,6 +201,12 @@ export const TOOLS = [
     annotations: { destructiveHint: true },
   },
   {
+    name: "publish_due_now",
+    description:
+      "Immediately publish any posts whose scheduled time has already passed, and refresh the status of posts that are publishing. Use when a post is late or the user asks to push due posts out now. Never publishes posts scheduled for the future.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  },
+  {
     name: "upload_media_from_url",
     description:
       "Copy an image or video from a public link into the scheduler's media hosting and return a stable media_url. Use when the original link might expire or isn't a direct file link.",
@@ -321,6 +327,16 @@ export async function callTool(name, args, userId) {
         throw new Error(exists ? `This post is already ${exists.status} and can't be cancelled.` : "Post not found.");
       }
       return { message: "Post cancelled." };
+    }
+
+    case "publish_due_now": {
+      const summary = await processDuePosts({ userId });
+      const recent = await prisma.scheduledPost.findMany({
+        where: { userId, updatedAt: { gte: new Date(Date.now() - 5 * 60_000) } },
+        orderBy: { updatedAt: "desc" },
+        take: 25,
+      });
+      return { summary, recently_updated: recent.map(summarizePost) };
     }
 
     case "upload_media_from_url": {
