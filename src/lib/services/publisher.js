@@ -187,7 +187,16 @@ export async function processDuePosts({ userId } = {}) {
       const res = await fetch(`https://api.muapi.ai/api/v1/predictions/${post.requestId}/result`, {
         headers: { "x-api-key": config.ai.apiKey }
       });
-      if (!res.ok) continue;
+      if (!res.ok) {
+        const body = (await res.text()).slice(0, 500);
+        console.error(`[PUBLISH_POLL] ${post.id} HTTP ${res.status}: ${body}`);
+        await prisma.scheduledPost.update({
+          where: { id: post.id },
+          data: { publishResult: JSON.stringify({ lastCheck: new Date().toISOString(), http: res.status, body }) },
+        });
+        summary.stillProcessing++;
+        continue;
+      }
 
       const result = await res.json();
       const status = result.status || result.state;
@@ -206,7 +215,7 @@ export async function processDuePosts({ userId } = {}) {
           }
         });
         summary.completed++;
-      } else if (status === "failed") {
+      } else if (status === "failed" || status === "cancelled") {
         await prisma.scheduledPost.update({
           where: { id: post.id },
           data: { status: "failed", error: result.error || "Publishing failed" }
@@ -214,6 +223,11 @@ export async function processDuePosts({ userId } = {}) {
         await UserService.addCredits(post.userId, config.ai.generationCost);
         summary.failed++;
       } else {
+        // Keep the latest raw status so a stuck post can be diagnosed.
+        await prisma.scheduledPost.update({
+          where: { id: post.id },
+          data: { publishResult: JSON.stringify({ lastCheck: new Date().toISOString(), status, raw: result }).slice(0, 4000) },
+        });
         summary.stillProcessing++;
       }
     } catch (err) {

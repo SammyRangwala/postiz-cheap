@@ -84,6 +84,7 @@ function summarizePost(p) {
     media_url: p.mediaUrl,
     published_url: p.publishedUrl || null,
     error: p.error || null,
+    last_status_check: p.status === "processing" && p.publishResult ? p.publishResult.slice(0, 1500) : undefined,
   };
 }
 
