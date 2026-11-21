@@ -116,7 +116,10 @@ export async function PATCH(req, { params }) {
             bodyData.reply_settings = "everyone";
           } else if (plat === "tiktok") {
             bodyData.title = post.title || captionText;
-            bodyData.privacy_level = post.privacy || "PUBLIC_TO_EVERYONE";
+            const tkMap = { public: "PUBLIC_TO_EVERYONE", unlisted: "FOLLOWER_OF_CREATOR", private: "SELF_ONLY", friends: "MUTUAL_FOLLOW_FRIENDS" };
+            const tkAllowed = ["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "FOLLOWER_OF_CREATOR", "SELF_ONLY"];
+            const tkRaw = post.privacy || "PUBLIC_TO_EVERYONE";
+            bodyData.privacy_level = tkAllowed.includes(tkRaw) ? tkRaw : (tkMap[String(tkRaw).toLowerCase()] || "PUBLIC_TO_EVERYONE");
           } else if (plat === "instagram" || plat === "facebook" || plat === "threads" || plat === "linkedin") {
             bodyData.caption = captionText;
             bodyData.placement = "timeline";
